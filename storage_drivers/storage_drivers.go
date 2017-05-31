@@ -110,6 +110,7 @@ type OntapStorageDriverConfigDefaults struct {
 	SnapshotDir     string `json:"snapshotDir"`
 	ExportPolicy    string `json:"exportPolicy"`
 	SecurityStyle   string `json:"securityStyle"`
+	SplitClone      string `jason:"splitClone"`
 }
 
 // ESeriesStorageDriverConfig holds settings for ESeriesStorageDriver
@@ -167,7 +168,7 @@ type StorageDriver interface {
 	Initialize(string, *CommonStorageDriverConfig) error
 	Validate() error
 	Create(name string, sizeBytes uint64, opts map[string]string) error
-	CreateClone(name, source, snapshot string) error
+	CreateClone(name, source, snapshot string, opts map[string]string) error
 	Destroy(name string) error
 	Attach(name, mountpoint string, opts map[string]string) error
 	Detach(name, mountpoint string) error

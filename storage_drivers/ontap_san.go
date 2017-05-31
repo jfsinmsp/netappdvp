@@ -191,6 +191,7 @@ func (d *OntapSANStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 	exportPolicy := utils.GetV(opts, "exportPolicy", d.Config.ExportPolicy)
 	aggregate := utils.GetV(opts, "aggregate", d.Config.Aggregate)
 	securityStyle := utils.GetV(opts, "securityStyle", d.Config.SecurityStyle)
+	splitClone := utils.GetV(opts, "splitClone", d.Config.SplitClone)
 
 	log.WithFields(log.Fields{
 		"name":            name,
@@ -202,6 +203,7 @@ func (d *OntapSANStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 		"exportPolicy":    exportPolicy,
 		"aggregate":       aggregate,
 		"securityStyle":   securityStyle,
+		"splitClone":      splitClone,
 	}).Debug("Creating volume with values")
 
 	// create the volume
@@ -233,8 +235,9 @@ func (d *OntapSANStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 }
 
 // Create a volume clone
-func (d *OntapSANStorageDriver) CreateClone(name, source, snapshot string) error {
-	return CreateOntapClone(name, source, snapshot, d.API)
+func (d *OntapSANStorageDriver) CreateClone(name, source, snapshot string, opts map[string]string) error {
+	splitClone := utils.GetV(opts, "splitClone", d.Config.SplitClone)
+	return CreateOntapClone(name, source, snapshot, splitClone, d.API)
 }
 
 // Destroy the requested (volume,lun) storage tuple

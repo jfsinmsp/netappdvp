@@ -178,6 +178,7 @@ func (d *OntapNASStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 	exportPolicy := utils.GetV(opts, "exportPolicy", d.Config.ExportPolicy)
 	aggregate := utils.GetV(opts, "aggregate", d.Config.Aggregate)
 	securityStyle := utils.GetV(opts, "securityStyle", d.Config.SecurityStyle)
+	splitClone := utils.GetV(opts, "splitClone", d.Config.SplitClone)
 
 	log.WithFields(log.Fields{
 		"name":            name,
@@ -189,6 +190,7 @@ func (d *OntapNASStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 		"exportPolicy":    exportPolicy,
 		"aggregate":       aggregate,
 		"securityStyle":   securityStyle,
+		"splitClone":      splitClone,
 	}).Debug("Creating volume with values")
 
 	// create the volume
@@ -213,7 +215,7 @@ func (d *OntapNASStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 			return fmt.Errorf("Error disabling snapshot directory access\n%verror: %v", response2.Result, error2)
 		}
 	}
-
+	
 	// mount the volume at the specified junction
 	response3, error3 := d.API.VolumeMount(name, "/"+name)
 	if !isPassed(response3.Result.ResultStatusAttr) || error3 != nil {
@@ -224,8 +226,13 @@ func (d *OntapNASStorageDriver) Create(name string, sizeBytes uint64, opts map[s
 }
 
 // Create a volume clone
-func (d *OntapNASStorageDriver) CreateClone(name, source, snapshot string) error {
-	return CreateOntapClone(name, source, snapshot, d.API)
+func (d *OntapNASStorageDriver) CreateClone(name, source, snapshot string, opts map[string]string) error {
+	splitClone := utils.GetV(opts, "splitClone", d.Config.SplitClone)
+
+	log.WithFields(log.Fields{
+		"splitClone":      splitClone,
+	}).Debug("Creating volume with values")
+	return CreateOntapClone(name, source, snapshot, splitClone, d.API)
 }
 
 // Destroy the volume
